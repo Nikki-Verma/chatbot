@@ -1,14 +1,11 @@
-// src/store/chatStore.ts
-import {create} from 'zustand';
+import create from 'zustand';
 
 interface ChatState {
-  chatVisible: boolean;
+  showChat: boolean;
   toggleChat: () => void;
 }
 
-const useChatStore = create<ChatState>(set => ({
-  chatVisible: false,
-  toggleChat: () => set(state => ({chatVisible: !state.chatVisible})),
+export const useChatStore = create<ChatState>(set => ({
+  showChat: false,
+  toggleChat: () => set(state => ({showChat: !state.showChat})),
 }));
-
-export default useChatStore;
