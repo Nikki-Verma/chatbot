@@ -9,6 +9,7 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 
 const {
   resolver: {sourceExts, assetExts},
+  transformer 
 } = getDefaultConfig(__dirname);
 const config = {
   resolver: {
@@ -16,6 +17,10 @@ const config = {
       '@': './src',
     },
   },
+  transformer: {
+    ...transformer,
+    babelTransformerPath: require.resolve('react-native-svg-transformer'),
+  }
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);

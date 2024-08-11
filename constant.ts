@@ -1,0 +1,9 @@
+export const X_USER_ID = "X-USER-ID";
+export const X_SELLER_ID = "X-SELLER-ID";
+export const X_CLIENT_ID = "X-CLIENT-ID";
+export const X_SELLER_PROFILE_ID = "X-SELLER-PROFILE-ID";
+export const X_TENANT_ID = "X-TENANT-ID";
+export const X_DEVICE_ID = "X-DEVICE-ID";
+export const X_PRODUCT_NAME = "X-PRODUCT-NAME";
+export const PIM_SID = "PIM-SID";
+export const A_ID = "AID";
