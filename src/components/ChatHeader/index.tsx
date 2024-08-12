@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CloseIcon from '../Icons/CloseIcon';
 import BackIcon from '../Icons/BackIcon';
 
-const ChatHeader = () => {
+const ChatHeader = ({chatConfig} : any) => {
 
     const {showChat, toggleChat} = useChatStore();
 
@@ -15,9 +15,14 @@ const ChatHeader = () => {
         <TouchableOpacity onPress={toggleChat}>
            <BackIcon style={{width : 25,height : 25}}/>
         </TouchableOpacity>
-        <Text style={headerStyle.botname}>
-        SimplAI
-        </Text>
+        {/* <View> */}
+            {/* <img
+              src={`${CHATBOT_BASE_URL}/public/lawyeredIcon.gif`}
+              width="24px"
+              style={{ borderRadius: 4 }}
+            /> */}
+          <Text style={headerStyle.botname}> {chatConfig?.model ?? "Bot"} </Text>
+        {/* </View> */}
         <TouchableOpacity onPress={toggleChat}>
            <CloseIcon style={{width : 25,height : 25}}/>
         </TouchableOpacity>

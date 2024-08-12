@@ -4,8 +4,8 @@ import 'react-native-get-random-values';
 
 const config: ChatSDKConfig = {
   TENANT_ID: '1',
-  TOKEN: '9097f6a0-0f74-40ea-9bce-545ef26ae845',
-  APP_ID: 'pipeline-668ea772b6a0726f4d1cced3',
+  TOKEN: '162cec30-f715-4e79-a883-069273dd1e8b',
+  APP_ID: 'pipeline-66a7da50ef61086f23221acb',
 };
 
 const App = () => {

@@ -38,6 +38,7 @@ function Message({ message, loading, chatStreaming,chatConfig } : any) {
               alignItems: "center",
               justifyContent: "flex-end",
               gap: 2,
+              flexDirection : 'row'
             }}
           >
             {/* <ChatLoadingIcon /> */}
@@ -64,7 +65,7 @@ function Message({ message, loading, chatStreaming,chatConfig } : any) {
               ""
             )}
             {message?.role === "SimplAi" && !chatStreaming && (
-              <View style={{ display : 'flex',justifyContent : 'flex-end',alignItems : 'center',width: "100%" }}>
+              <View style={{ display : 'flex',flexDirection : 'row',justifyContent : 'flex-end',alignItems : 'center',width: "100%" }}>
                 {showCopied ? (
                     <Text>
                         Copied
@@ -77,7 +78,6 @@ function Message({ message, loading, chatStreaming,chatConfig } : any) {
                           "  \n",
                         );
                         Clipboard.setString(copyContent);
-                        Alert.alert('Copied to clipboard', 'The text has been copied to your clipboard.');
                         setShowCopied(true);
                         setTimeout(() => {
                           setShowCopied(false);

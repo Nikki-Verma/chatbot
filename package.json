@@ -21,6 +21,7 @@
     "react-native": "0.74.5",
     "react-native-get-random-values": "^1.11.0",
     "react-native-markdown-display": "^7.0.2",
+    "react-native-sse": "^1.2.1",
     "react-native-svg": "^15.5.0",
     "uuid": "^10.0.0",
     "zustand": "^4.5.4"

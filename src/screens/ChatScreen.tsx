@@ -38,6 +38,7 @@ const ChatScreen = ({
   return (
     <View style={styles.container}>
       <ChatHeader
+      chatConfig = {chatConfig}
       />
       <ChatBot
         messages={messages}

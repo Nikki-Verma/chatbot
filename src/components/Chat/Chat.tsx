@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Message from './Message';
 
 const Chat = ({
@@ -40,12 +40,13 @@ const Chat = ({
             style = {ChatStyle.messagesContainer}
             ref={flatListRef}
             data={messages}
-            renderItem={({ item, index }) => 
-                <Message
+            
+            renderItem={({ item, index }) => {
+                return <Message
                     key={Math.random()*1000}
                     message={item}
                     loading={
-                    index === item?.length - 1 &&
+                    index === messages?.length - 1 &&
                     loading &&
                     item?.role !== "user"
                     }
@@ -53,7 +54,8 @@ const Chat = ({
                     chatConfig = {chatConfig}
                 />
             }
-            keyExtractor={(item) => `${Math.random()}`}
+            }
+            keyExtractor={(item) => item.id}
             onContentSizeChange={() => {
                 if(flatListRef.current){
                     flatListRef.current.scrollToEnd({ animated: true });

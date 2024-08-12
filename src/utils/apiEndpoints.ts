@@ -1,11 +1,11 @@
-const __EDGE_URL__ ='https://edge-service-preprod.simplai.ai';
+const __EDGE_URL__ ='https://edge-service.simplai.ai';
 
 const __IDENTITY_BASE_URL__ ='/identity-service';
-const __INTRACT_BASE_URL__ = '/interact';
+const __INTRACT_BASE_URL__ = 'https://interact.simplai.ai';
 
 export const BASE_URLS = {
   identity: `${__EDGE_URL__}${__IDENTITY_BASE_URL__}`,
-  intract: `${__EDGE_URL__}${__INTRACT_BASE_URL__}`,
+  intract: `${__INTRACT_BASE_URL__}`,
 };
 
 const config = {
@@ -15,7 +15,7 @@ const config = {
   },
   intract: {
     initiateConversation: `${BASE_URLS.intract}/api/v1/intract/embed/conversation`,
-    streamResponse: `${BASE_URLS.intract}/api/v1/intract/embed/conversation/fetch`,
+    streamResponse: `${BASE_URLS.intract}/api/v1/intract/data`,
     chatHistoryList: `${BASE_URLS.intract}/api/v1/intract/embed/conversation`,
     chatDetails: `${BASE_URLS.intract}/api/v1/intract/embed/conversation`,
   },
