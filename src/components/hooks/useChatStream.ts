@@ -1,11 +1,11 @@
-import { initiateConversationApi } from '@/api/interact';
-import { useChatStore } from '@/store/chatStore';
+import {initiateConversationApi} from '@/api/interact';
+import {useChatStore} from '@/store/chatStore';
 import config from '@/utils/apiEndpoints';
-import { useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { X_SELLER_ID, X_SELLER_PROFILE_ID } from '../../../constant';
-import { getChatDetails } from '../../utils/stream';
+import {useEffect, useRef, useState} from 'react';
 import EventSource from 'react-native-sse';
+import {v4 as uuidv4} from 'uuid';
+import {X_SELLER_ID, X_SELLER_PROFILE_ID} from '../../../constant';
+import {getChatDetails} from '../../utils/stream';
 
 const SimplAi_ERROR_MESSAGE = 'Something went wrong fetching AI response.';
 
@@ -218,16 +218,15 @@ const useChatStream = (input: InputProps) => {
 
   const fetchAndUpdateAIResponse = async (messageID: string) => {
     try {
-
       // startSSE(`${config.intract.streamResponse}/${messageID}/stream`)
 
       streamRef.current = new EventSource(
         `${config.intract.streamResponse}/${messageID}/stream`,
         {
-          headers : {
-            accept : 'text/event-stream'
-          }
-        }
+          headers: {
+            accept: 'text/event-stream',
+          },
+        },
       ); // Replace with your actual SSE endpoint
       console.log(
         '🚀 ~ fetchAndUpdateAIResponse ~ streamRef.current Nikhil:',
@@ -289,22 +288,21 @@ const useChatStream = (input: InputProps) => {
         },
       );
 
-      streamRef?.current?.addEventListener("close", (event : any) => {
-        console.log("Close SSE connection.",event);
-      })
+      streamRef?.current?.addEventListener('close', (event: any) => {
+        console.log('Close SSE connection.', event);
+      });
 
       if (streamRef.current) {
         streamRef?.current?.addEventListener('error', (error: any) => {
           // Handle any errors (e.g., connection closed)
 
-
           if (streamRef.current) {
             streamRef.current.close();
-            console.log('user config: new new ',userSessionConfig)
+            console.log('user config: new new ', userSessionConfig);
             console.log('SSE error: ', error);
             streamRef.current = undefined;
-            setChatStreaming(false)
-            setIsLoading(false)
+            setChatStreaming(false);
+            setIsLoading(false);
           }
         });
       }
@@ -318,7 +316,7 @@ const useChatStream = (input: InputProps) => {
   };
 
   const stopStream = async () => {
-    console.log('signal', signal,controller,streamRef.current);
+    console.log('signal', signal, controller, streamRef.current);
     if (signal && controller) {
       controller.abort();
     }
@@ -329,12 +327,17 @@ const useChatStream = (input: InputProps) => {
       setIsLoading(false);
     }
     setChatStreaming(false);
-      setIsLoading(false);
+    setIsLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent, newMessage?: string) => {
-    if (isLoading || chatStreaming || (!message.trim() && !newMessage?.trim()))
+    if (
+      isLoading ||
+      chatStreaming ||
+      (!message.trim() && !newMessage?.trim())
+    ) {
       return null;
+    }
     setIsLoading(true);
     setChatStreaming(true);
     addMessageToChat(newMessage ?? message, 'user');

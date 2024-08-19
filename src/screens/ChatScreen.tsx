@@ -23,7 +23,7 @@ const ChatScreen = ({
 } : any) => {
   const {chatbotConfig} = useChatSDK();
   const {showChat, toggleChat} = useChatStore();
-  console.log('hello there');
+  console.log('hello there',input);
 
   if (!chatbotConfig || !chatbotConfig.TOKEN || !chatbotConfig.APP_ID || !chatbotConfig?.TENANT_ID) {
     return (

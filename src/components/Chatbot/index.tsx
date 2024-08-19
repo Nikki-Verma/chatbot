@@ -17,6 +17,8 @@ const ChatBot = ({
     WelcomeMessage,
     chatConfig
   } : any) => {
+
+    console.log(`input root`,input)
     return (
       <View style={ChatbotStyle.container}>
         <Chat

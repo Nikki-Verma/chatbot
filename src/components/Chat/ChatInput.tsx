@@ -1,6 +1,16 @@
-import React, { memo, useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import { isEqual } from 'lodash';
+import {isEqual} from 'lodash';
+import React, {memo, useState} from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import AudioVisualizerComponent from '../AudioVisualizerComponent';
+import MicIcon from '../Icons/MicIcon';
 import SendIcon from '../Icons/SendIcon';
 import StopIcon from '../Icons/StopIcon';
 
@@ -27,25 +37,25 @@ const ChatInput: React.FC<Props> = memo(function ChatInput({
   input,
   handleInputChange,
   stopStream,
-  agentId,
+  agentId = '66a73937facd745821a59c87',
 }: any) {
   const [audioVisualizerOpen, setAudioVisualizerOpen] = useState(false);
 
   const toggleAudioVisualizer = () => {
-    setAudioVisualizerOpen((prev) => !prev);
+    setAudioVisualizerOpen(prev => !prev);
   };
 
-  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-    if (e.nativeEvent.key === 'Enter') {
-      submitHandler();
-    }
-  };
+  // const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+  //   if (e.nativeEvent.key === 'Enter') {
+  //     e.preventDefault()
+  //     submitHandler();
+  //   }
+  // };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+      style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Message..."
@@ -55,15 +65,15 @@ const ChatInput: React.FC<Props> = memo(function ChatInput({
           multiline
           numberOfLines={1}
           scrollEnabled={true}
-          onKeyPress={handleKeyPress}
+          // onKeyPress={handleKeyPress}
           onSubmitEditing={() => submitHandler()}
         />
         <View style={styles.rightColumn}>
           {!loading ? (
-            <View style={styles.flexColumn}>
+            <View style={styles.flexRow}>
               {!!agentId && (
                 <TouchableOpacity onPress={toggleAudioVisualizer}>
-                  <Text style={styles.audioIcon}>🎤</Text>
+                  <MicIcon />
                 </TouchableOpacity>
               )}
               <TouchableOpacity onPress={() => submitHandler()}>
@@ -74,19 +84,23 @@ const ChatInput: React.FC<Props> = memo(function ChatInput({
             <TouchableOpacity
               key="stop-streaming"
               style={styles.stopButton}
-              onPress={stopStream}
-            >
+              onPress={stopStream}>
               <StopIcon style={styles.stopIcon} />
             </TouchableOpacity>
           )}
-          {/* <Text style={styles.rightBadge}>
-            Use <Text style={styles.shortcut}>shift + return</Text> for new line
-          </Text> */}
         </View>
       </View>
+      <SafeAreaView style={styles.container}>
+        <AudioVisualizerComponent
+          modalOpen={audioVisualizerOpen}
+          onClose={toggleAudioVisualizer}
+          agentId={agentId}
+        />
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
-}, areEqual);
+},
+areEqual);
 
 export default ChatInput;
 
@@ -95,7 +109,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    marginBottom :8
+    marginBottom: 8,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -110,18 +124,18 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     textAlignVertical: 'top',
-    minHeight : 20,
-    maxHeight : 75
+    minHeight: 20,
+    maxHeight: 75,
   },
   rightColumn: {
     paddingHorizontal: 8,
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     display: 'flex',
-    flexDirection : 'row'
+    flexDirection: 'row',
   },
-  flexColumn: {
-    flexDirection: 'column',
+  flexRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
@@ -132,7 +146,7 @@ const styles = StyleSheet.create({
   sendIcon: {
     fontSize: 24,
     color: '#c7c7c7',
-    transform: [{ rotate: '-90deg' }],
+    transform: [{rotate: '-90deg'}],
   },
   stopButton: {
     padding: 2,

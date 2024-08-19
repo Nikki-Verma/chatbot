@@ -1,7 +1,8 @@
-const __EDGE_URL__ ='https://edge-service.simplai.ai';
+const __EDGE_URL__ = 'https://edge-service.simplai.ai';
 
-const __IDENTITY_BASE_URL__ ='/identity-service';
+const __IDENTITY_BASE_URL__ = '/identity-service';
 const __INTRACT_BASE_URL__ = 'https://interact.simplai.ai';
+export const __AGENT_PUBLIC_BASE_URL__ = 'https://agent-service.simplai.ai';
 
 export const BASE_URLS = {
   identity: `${__EDGE_URL__}${__IDENTITY_BASE_URL__}`,

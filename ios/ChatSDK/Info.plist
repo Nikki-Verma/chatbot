@@ -48,5 +48,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+<string>Camera permission description</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Microphone permission description</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app requires access to your photo library.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app requires access to save photos.</string>
 </dict>
 </plist>

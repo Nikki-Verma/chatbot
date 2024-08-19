@@ -3,15 +3,15 @@ import ChatScreen from '@/screens/ChatScreen';
 import {ChatSDKConfig} from '@/types/ChatSDKConfig';
 import {Button} from '@ant-design/react-native';
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
-import {useChatStore} from './store/chatStore';
-import _authHttp from "./services/authHttp";
-import _unauthHttp from "./services/unAuthHttp";
-import apiEndpointConfig from './utils/apiEndpoints';
-import { A_ID, PIM_SID, X_TENANT_ID } from '../constant';
+import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
+import {v4 as uuidv4} from 'uuid';
+import {A_ID, PIM_SID, X_TENANT_ID} from '../constant';
 import useChatStream from './components/hooks/useChatStream';
-import { encryptData } from './utils/helperFunctions';
-import { v4 as uuidv4 } from "uuid";
+import _authHttp from './services/authHttp';
+import _unauthHttp from './services/unAuthHttp';
+import {useChatStore} from './store/chatStore';
+import apiEndpointConfig from './utils/apiEndpoints';
+import {encryptData} from './utils/helperFunctions';
 
 export const ChatSDK = {
   init: (config: ChatSDKConfig) => {
@@ -26,7 +26,13 @@ export const ChatSDK = {
 const ChatInit = ({config}: {config: ChatSDKConfig}) => {
   console.log('🚀 ~ ChatInit ~ config:', config);
   const {setChatbotConfig} = useChatSDK();
-  const {showChat, toggleChat,userSessionConfig,updateUserSessionConfig, resetUserSessionConfig} = useChatStore();
+  const {
+    showChat,
+    toggleChat,
+    userSessionConfig,
+    updateUserSessionConfig,
+    resetUserSessionConfig,
+  } = useChatStore();
   const [sessionFetching, setSessionFetching] = useState(true);
 
   useEffect(() => {
@@ -36,7 +42,6 @@ const ChatInit = ({config}: {config: ChatSDKConfig}) => {
   const handlePress = () => {
     toggleChat();
   };
-
 
   useEffect(() => {
     if (!userSessionConfig?.PIM_SID) {
@@ -61,28 +66,31 @@ const ChatInit = ({config}: {config: ChatSDKConfig}) => {
     chatConfig,
   } = useChatStream({
     chatConfig: {
-      model: "",
-      language_code: "EN",
-      source: "APP",
-      app_id: "",
-      model_id: "",
+      model: '',
+      language_code: 'EN',
+      source: 'APP',
+      app_id: '',
+      model_id: '',
     },
   });
 
   const getGuestSession = async () => {
     try {
       setSessionFetching(true);
-      console.log("hello", updateUserSessionConfig);
-      console.log(`response se pehle sdkhvjbndsfkjvndfv`)
-      const response = await _unauthHttp.get(apiEndpointConfig.identity.getGuestSession, {
-        headers: {
-          [X_TENANT_ID]: config?.TENANT_ID,
+      console.log('hello', updateUserSessionConfig);
+      console.log(`response se pehle sdkhvjbndsfkjvndfv`);
+      const response = await _unauthHttp.get(
+        apiEndpointConfig.identity.getGuestSession,
+        {
+          headers: {
+            [X_TENANT_ID]: config?.TENANT_ID,
+          },
         },
-      });
-      console.log(`response se baad   sldknv sdkhvjbndsfkjvndfv`)
-      console.log("🚀 ~ getGuestSession ~ response:", response);
+      );
+      console.log(`response se baad   sldknv sdkhvjbndsfkjvndfv`);
+      console.log('🚀 ~ getGuestSession ~ response:', response);
       console.log(
-        "🚀 ~ getGuestSession ~ response?.headers:",
+        '🚀 ~ getGuestSession ~ response?.headers:',
         response?.data?.result?.[0]?.token,
       );
       if (response.status === 200 && response?.data?.ok) {
@@ -93,20 +101,23 @@ const ChatInit = ({config}: {config: ChatSDKConfig}) => {
         const encryptedData = encryptData(dataToEncrypt, encryptionKey);
 
         // const encryptedData = encryptData(dataToEncrypt, encryptionKey);
-        console.log("Encrypted data:", encryptedData);
+        console.log('Encrypted data:', encryptedData);
 
-        const configResponse = await _authHttp.get(apiEndpointConfig.embed.config, {
-          headers: {
-            [PIM_SID]: response?.data?.result?.[0]?.token,
-            [X_TENANT_ID]: config?.TENANT_ID,
-            [A_ID]: encryptedData,
-            type: "embed",
+        const configResponse = await _authHttp.get(
+          apiEndpointConfig.embed.config,
+          {
+            headers: {
+              [PIM_SID]: response?.data?.result?.[0]?.token,
+              [X_TENANT_ID]: config?.TENANT_ID,
+              [A_ID]: encryptedData,
+              type: 'embed',
+            },
+            params: {
+              id: config?.APP_ID,
+            },
           },
-          params: {
-            id: config?.APP_ID,
-          },
-        });
-        console.log("🚀 ~ getGuestSession ~ configResponse:", configResponse);
+        );
+        console.log('🚀 ~ getGuestSession ~ configResponse:', configResponse);
         if (configResponse?.status === 200) {
           // Usage example
           updateUserSessionConfig({
@@ -118,15 +129,15 @@ const ChatInit = ({config}: {config: ChatSDKConfig}) => {
           });
           setChatConfig({
             model: configResponse?.data?.app_name,
-            language_code: "EN",
-            source: "APP",
+            language_code: 'EN',
+            source: 'APP',
             app_id: configResponse?.data?.app_id,
             model_id: configResponse?.data?.model_id,
           });
         }
       }
     } catch (error) {
-      console.log("error while getting guest session",error);
+      console.log('error while getting guest session', error);
     } finally {
       setSessionFetching(false);
     }
@@ -137,18 +148,18 @@ const ChatInit = ({config}: {config: ChatSDKConfig}) => {
       <StatusBar />
       {showChat ? (
         <ChatScreen
-        messages = {messages}
-        input ={input}
-        handleInputChange = {handleInputChange}
-        handleSubmit = {handleSubmit}
-        isLoading = {isLoading}
-        chatStreaming = {chatStreaming}
-        setInput = {setInput}
-        changeConversation = {changeConversation}
-        changeConversationLoading = {changeConversationLoading}
-        stopStream = {stopStream}
-        setChatConfig = {setChatConfig}
-        chatConfig = {chatConfig}
+          messages={messages}
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}
+          chatStreaming={chatStreaming}
+          setInput={setInput}
+          changeConversation={changeConversation}
+          changeConversationLoading={changeConversationLoading}
+          stopStream={stopStream}
+          setChatConfig={setChatConfig}
+          chatConfig={chatConfig}
         />
       ) : (
         <Button type="primary" onPress={handlePress}>
