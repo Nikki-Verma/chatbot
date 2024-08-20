@@ -1,58 +1,83 @@
-import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import {Buffer} from 'buffer';
+import React, {useEffect, useRef, useState} from 'react';
+import {Dimensions, View} from 'react-native';
+import Svg, {Line} from 'react-native-svg';
 
-const AudioVisualizer = ({audioData, isAgent = false}: any) => {
-  const [visualData, setVisualData] = useState<number[]>([]);
+const {width: screenWidth} = Dimensions.get('window');
+
+const AudioVisualizer = ({base64AudioData, isAgent}: any) => {
+  const [waveform, setWaveform] = useState<
+    {x: number; y1: number; y2: number}[]
+  >([]);
+  const svgRef = useRef(null);
+
+  const containerWidth = screenWidth * 0.5;
+  const containerHeight = 100;
+  const minHeight = 20; // Set minimum height to 20
+  const lineSpacing = 4; // Increase this value to add more space between lines
 
   useEffect(() => {
-    if (audioData) {
-      // Normalize the audio data for visualization purposes
-      // const buffer = new Uint8Array(audioData);
-      // console.log(`ui audio buffer `,buffer)
-      // const normalizedData = Array.from(buffer).map(value => value / 255);
-      // setVisualData(normalizedData);
-      // console.log(`normalised audio data`,normalizedData)
-
-      console.log(`audio data`, audioData);
+    if (base64AudioData) {
+      const decodedData = decodeBase64ToPCM(base64AudioData);
+      const newWaveform = generateWaveform(decodedData);
+      setWaveform(newWaveform);
     }
-  }, [audioData]);
+  }, [base64AudioData]);
 
-  const renderBars = () => {
-    const barWidth = 10;
-    const barSpacing = 5;
-    const bars = visualData.map((value, index) => {
-      const barHeight = value * 100;
-      const x = index * (barWidth + barSpacing);
-      const gradientId = `grad${index}`;
+  const decodeBase64ToPCM = (base64Data: any) => {
+    const buffer = Buffer.from(base64Data, 'base64');
+    const pcmData = new Int16Array(
+      buffer.buffer,
+      buffer.byteOffset,
+      buffer.byteLength / Int16Array.BYTES_PER_ELEMENT,
+    );
+    return pcmData;
+  };
 
-      return (
-        <React.Fragment key={index}>
-          <Defs>
-            <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={isAgent ? '#C266E7' : '#3E5AEC'} />
-              <Stop offset="1" stopColor={isAgent ? '#602EDF' : '#20D1DC'} />
-            </LinearGradient>
-          </Defs>
-          <Rect
-            x={x}
-            y={50 - barHeight / 2}
-            width={barWidth}
-            height={barHeight}
-            rx={3.75}
-            ry={3.75}
-            fill={`url(#${gradientId})`}
-          />
-        </React.Fragment>
-      );
-    });
-    return bars;
+  const generateWaveform = (pcmData: Int16Array) => {
+    const step = Math.floor(pcmData.length / (containerWidth / lineSpacing));
+
+    return pcmData.reduce<{x: number; y1: number; y2: number}[]>(
+      (result, value, index) => {
+        if (index % step === 0) {
+          const x = (index / step) * lineSpacing;
+          const normalizedValue = Math.abs(value) / 32768; // Normalize value to range [0, 1]
+          const amplitude =
+            (normalizedValue * (containerHeight - minHeight)) / 2; // Calculate amplitude based on the normalized value
+          const y1 = containerHeight / 2 - (minHeight / 2 + amplitude);
+          const y2 = containerHeight / 2 + (minHeight / 2 + amplitude);
+          result.push({x, y1, y2});
+        }
+        return result;
+      },
+      [],
+    );
   };
 
   return (
-    <View style={{width: '100%', height: 60}}>
-      <Svg width="100%" height="100%">
-        {renderBars()}
+    <View
+      style={{
+        width: containerWidth,
+        height: containerHeight,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      <Svg
+        ref={svgRef}
+        height={containerHeight}
+        width={containerWidth}
+        viewBox={`0 0 ${containerWidth} ${containerHeight}`}>
+        {waveform.map((point, index) => (
+          <Line
+            key={index}
+            x1={point.x}
+            y1={point.y1}
+            x2={point.x}
+            y2={point.y2}
+            stroke={isAgent ? '#C266E7' : '#20D1DC'}
+            strokeWidth="2"
+          />
+        ))}
       </Svg>
     </View>
   );

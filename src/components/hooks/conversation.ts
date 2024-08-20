@@ -36,12 +36,13 @@ export const useConversation = (config: any) => {
   const [currentSpeaker, setCurrentSpeaker] = useState<
     'none' | 'user' | 'agent'
   >('none');
-  const [userAudioData, setUserAudioData] = useState<number[]>([]);
-  const [agentAudioData, setAgentAudioData] = useState<number[]>([]);
+  const [userAudioData, setUserAudioData] = useState<string>('');
+  const [agentAudioData, setAgentAudioData] = useState<string>();
 
   useEffect(() => {
     const playAudioBuffer = async (audioBuffer: string) => {
       try {
+        console.log(`audio buffer`, audioBuffer);
         const path = `${RNFS.DocumentDirectoryPath}/temp_audio.wav`;
 
         // Write the base64 encoded audio buffer to a file
@@ -54,7 +55,8 @@ export const useConversation = (config: any) => {
           return;
         }
 
-        console.log('File exists at path:', path);
+        const fileContent = await RNFS.readFile(path, 'base64');
+        console.log('File exists at path and contains:', fileContent);
 
         // Set the audio category for iOS
         Sound.setCategory('Playback', true);
@@ -64,7 +66,9 @@ export const useConversation = (config: any) => {
             console.log('Failed to load the sound', error);
             return;
           }
+          console.log('Sound loaded successfully');
           sound.play(success => {
+            console.log('Sound.play callback invoked');
             if (success) {
               console.log('Successfully finished playing');
               sound.release();
@@ -83,6 +87,7 @@ export const useConversation = (config: any) => {
     if (!processing && audioQueue.length > 0) {
       setProcessing(true);
       const audio = audioQueue.shift();
+      setAgentAudioData(audio);
       if (audio) {
         playAudioBuffer(audio);
       }
@@ -113,7 +118,6 @@ export const useConversation = (config: any) => {
       console.log('message received', event);
       const message = JSON.parse(event.data);
       if (message.type === 'websocket_audio') {
-        setAgentAudioData(prev => [...Buffer.from(message.data, 'base64')]);
         setAudioQueue(prev => [...prev, message.data]);
       } else if (message.type === 'websocket_ready') {
         setStatus('connected');
@@ -232,12 +236,11 @@ export const useConversation = (config: any) => {
         console.log(`Audio recording data received`, data);
         const chunk = Buffer.from(data, 'base64');
         console.log('AudioRecord captured data:', chunk); // Log data to debug
-        if (data && data.length > 0) {
-          // setUserAudioData((prev: any) => [...prev, ...data]);
+        if (chunk && chunk.length > 0) {
+          setUserAudioData(data);
           if (newSocket.readyState === WebSocket.OPEN) {
-            const base64AudioData = Buffer.from(data).toString('base64');
             newSocket.send(
-              JSON.stringify({
+              stringify({
                 type: 'websocket_audio',
                 data: data,
               }),
@@ -263,7 +266,7 @@ export const useConversation = (config: any) => {
     }
 
     if (socket) {
-      socket.send(JSON.stringify({type: 'websocket_stop'}));
+      socket.send(stringify({type: 'websocket_stop'}));
       socket.close();
       setSocket(null);
     }

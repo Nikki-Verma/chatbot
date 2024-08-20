@@ -35,9 +35,9 @@ const AudioVisualizerComponent = ({modalOpen, onClose, agentId}: any) => {
       return (
         <View style={styles.visualizerContainer}>
           <Text style={styles.speakerName}>Agent</Text>
-          <AudioVisualizer audioData={agentAudioData} isAgent={true} />
+          <AudioVisualizer base64AudioData={agentAudioData} isAgent={true} />
           <Text style={styles.speakerName}>You</Text>
-          <AudioVisualizer audioData={userAudioData} isAgent={false} />
+          <AudioVisualizer base64AudioData={userAudioData} isAgent={false} />
           <TouchableOpacity
             onPress={() => {
               console.log(`onpress called for stopconversation`);
