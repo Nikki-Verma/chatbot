@@ -1,6 +1,6 @@
+import 'react-native-get-random-values';
 import {ChatSDK} from './src/ChatSDK';
 import {ChatSDKConfig} from './src/types/ChatSDKConfig';
-import 'react-native-get-random-values';
 
 const config: ChatSDKConfig = {
   TENANT_ID: '1',

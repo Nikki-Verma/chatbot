@@ -1,26 +1,25 @@
 import {stringify} from '@/utils/helperFunctions';
 import {useEffect, useState} from 'react';
-import {PermissionsAndroid, Platform} from 'react-native';
 import AudioRecord from 'react-native-audio-record';
 import RNFS from 'react-native-fs';
 import Sound from 'react-native-sound';
 
 const requestPermissions = async (): Promise<boolean> => {
-  if (Platform.OS === 'android') {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-    ]);
-    return (
-      granted['android.permission.RECORD_AUDIO'] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted['android.permission.READ_EXTERNAL_STORAGE'] ===
-        PermissionsAndroid.RESULTS.GRANTED
-    );
-  }
+  // if (Platform.OS === 'android') {
+  //   const granted = await PermissionsAndroid.requestMultiple([
+  //     PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+  //     PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  //     PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+  //   ]);
+  //   return (
+  //     granted['android.permission.RECORD_AUDIO'] ===
+  //       PermissionsAndroid.RESULTS.GRANTED &&
+  //     granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+  //       PermissionsAndroid.RESULTS.GRANTED &&
+  //     granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+  //       PermissionsAndroid.RESULTS.GRANTED
+  //   );
+  // }
   return true;
 };
 
@@ -232,7 +231,7 @@ export const useConversation = (config: any) => {
       AudioRecord.on('data', data => {
         console.log(`Audio recording data received`, data);
         const chunk = Buffer.from(data, 'base64');
-        console.log('AudioRecord captured data:', chunk.byteLength); // Log data to debug
+        console.log('AudioRecord captured data:', chunk); // Log data to debug
         if (data && data.length > 0) {
           // setUserAudioData((prev: any) => [...prev, ...data]);
           if (newSocket.readyState === WebSocket.OPEN) {
@@ -240,7 +239,7 @@ export const useConversation = (config: any) => {
             newSocket.send(
               JSON.stringify({
                 type: 'websocket_audio',
-                data: base64AudioData,
+                data: data,
               }),
             );
           }
