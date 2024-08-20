@@ -21,6 +21,7 @@ const AudioVisualizerComponent = ({modalOpen, onClose, agentId}: any) => {
     }
 
     return () => {
+      console.log(`cleanup called for stopconversation`);
       stop(); // Clean up the conversation when the modal closes
     };
   }, [modalOpen]);
@@ -37,7 +38,12 @@ const AudioVisualizerComponent = ({modalOpen, onClose, agentId}: any) => {
           <AudioVisualizer audioData={agentAudioData} isAgent={true} />
           <Text style={styles.speakerName}>You</Text>
           <AudioVisualizer audioData={userAudioData} isAgent={false} />
-          <TouchableOpacity onPress={() => stop()} style={styles.button}>
+          <TouchableOpacity
+            onPress={() => {
+              console.log(`onpress called for stopconversation`);
+              stop();
+            }}
+            style={styles.button}>
             <Text style={styles.buttonText}>Stop</Text>
           </TouchableOpacity>
         </View>

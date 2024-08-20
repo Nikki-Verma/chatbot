@@ -1,11 +1,9 @@
-import {getErrorFromApi, stringify} from '@/utils/helperFunctions';
+import {stringify} from '@/utils/helperFunctions';
 import {useEffect, useState} from 'react';
 import {PermissionsAndroid, Platform} from 'react-native';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import AudioRecord from 'react-native-audio-record';
 import RNFS from 'react-native-fs';
 import Sound from 'react-native-sound';
-
-const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const requestPermissions = async (): Promise<boolean> => {
   if (Platform.OS === 'android') {
@@ -32,28 +30,37 @@ export const useConversation = (config: any) => {
   const [recorderState, setRecorderState] = useState<
     'inactive' | 'recording' | 'paused'
   >('inactive');
-  const [recorder, setRecorder] = useState<AudioRecorderPlayer | null>(null);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [transcripts, setTranscripts] = useState<any[]>([]);
-  const [userAudioData, setUserAudioData] = useState<number[]>([]);
-  const [agentAudioData, setAgentAudioData] = useState<number[]>([]);
   const [audioQueue, setAudioQueue] = useState<string[]>([]);
   const [processing, setProcessing] = useState<boolean>(false);
   const [currentSpeaker, setCurrentSpeaker] = useState<
     'none' | 'user' | 'agent'
   >('none');
+  const [userAudioData, setUserAudioData] = useState<number[]>([]);
+  const [agentAudioData, setAgentAudioData] = useState<number[]>([]);
 
   useEffect(() => {
     const playAudioBuffer = async (audioBuffer: string) => {
       try {
-        console.log(`play audio buffer called:`);
-        const path = `${RNFS.DocumentDirectoryPath}/temp_audio.mp3`;
-        console.log('Writing audio data to file at:', path);
+        const path = `${RNFS.DocumentDirectoryPath}/temp_audio.wav`;
 
-        // Ensure the audio buffer is base64 encoded
+        // Write the base64 encoded audio buffer to a file
         await RNFS.writeFile(path, audioBuffer, 'base64');
 
-        const sound = new Sound(path, Sound.MAIN_BUNDLE, error => {
+        // Check if the file exists
+        const fileExists = await RNFS.exists(path);
+        if (!fileExists) {
+          console.error('File does not exist at path:', path);
+          return;
+        }
+
+        console.log('File exists at path:', path);
+
+        // Set the audio category for iOS
+        Sound.setCategory('Playback', true);
+
+        const sound = new Sound(path, '', error => {
           if (error) {
             console.log('Failed to load the sound', error);
             return;
@@ -74,13 +81,10 @@ export const useConversation = (config: any) => {
       }
     };
 
-    console.log(`Audio playback called successfully`, audioQueue, processing);
-
     if (!processing && audioQueue.length > 0) {
       setProcessing(true);
       const audio = audioQueue.shift();
       if (audio) {
-        console.log('Processing audio:', audio);
         playAudioBuffer(audio);
       }
     }
@@ -88,6 +92,8 @@ export const useConversation = (config: any) => {
 
   const startConversation = async () => {
     const permissionsGranted = await requestPermissions();
+
+    console.log(`permissionsGranted: ${permissionsGranted}`);
     if (!permissionsGranted) {
       setError(new Error('Microphone or storage permissions not granted'));
       return;
@@ -96,8 +102,6 @@ export const useConversation = (config: any) => {
     setStatus('connecting');
 
     const backendUrl = await getBackendUrl();
-    console.log('🚀 ~ startConversation ~ backendUrl:', backendUrl);
-
     const newSocket = new WebSocket(backendUrl);
     let error: Error | undefined;
 
@@ -107,9 +111,10 @@ export const useConversation = (config: any) => {
     };
 
     newSocket.onmessage = event => {
+      console.log('message received', event);
       const message = JSON.parse(event.data);
-      console.log('Received WebSocket message:', message);
       if (message.type === 'websocket_audio') {
+        setAgentAudioData(prev => [...Buffer.from(message.data, 'base64')]);
         setAudioQueue(prev => [...prev, message.data]);
       } else if (message.type === 'websocket_ready') {
         setStatus('connected');
@@ -136,7 +141,7 @@ export const useConversation = (config: any) => {
     };
 
     newSocket.onclose = () => {
-      console.log('socket closed:');
+      console.log(`onclose called for stopconversation`, error);
       stopConversation(error);
     };
 
@@ -144,7 +149,6 @@ export const useConversation = (config: any) => {
 
     await new Promise(resolve => {
       const interval = setInterval(() => {
-        console.log('socket connection state:', newSocket.readyState);
         if (newSocket.readyState === WebSocket.OPEN) {
           clearInterval(interval);
           resolve(null);
@@ -152,45 +156,14 @@ export const useConversation = (config: any) => {
       }, 100);
     });
 
-    const options = {
-      sampleRate: 16000, // Sample rate
-      channels: 1, // Mono channel
-      bitsPerSample: 16, // 16-bit PCM
-      wavFile: 'test.wav', // Optional, only if you need to save the recording to a file
-    };
-
-    // AudioRecord.init(options);
-    // AudioRecord.start();
-
-    // // 4. Handle raw PCM data
-    // AudioRecord.on('data', data => {
-    //   // data is a buffer containing raw PCM audio data
-    //   if (newSocket.readyState === WebSocket.OPEN) {
-    //     const base64AudioData = Buffer.from(data).toString('base64');
-    //     newSocket.send(
-    //       JSON.stringify({
-    //         type: 'websocket_audio',
-    //         data: base64AudioData,
-    //       }),
-    //     );
-    //   }
-    // });
     try {
-      let recorderToUse = recorder;
-      console.log(
-        '🚀 ~ startConversation ~ already exists recorderToUse:',
-        recorderToUse,
-      );
-      if (recorderToUse && recorderState === 'paused') {
-        recorderToUse.resumeRecorder();
-      } else if (!recorderToUse) {
-        recorderToUse = audioRecorderPlayer;
-        console.log(
-          '🚀 ~ startConversation ~ newly created recorderToUse:',
-          recorderToUse,
-        );
-        setRecorder(recorderToUse);
-      }
+      const options = {
+        sampleRate: 16000, // Sample rate
+        channels: 1, // Mono channel
+        bitsPerSample: 16, // 16-bit PCM
+        audioSource: 6,
+        wavFile: `${RNFS.DocumentDirectoryPath}/temp_audio.wav`, // Optional, only if you need to save the recording to a file
+      };
 
       const inputAudioMetadata = {
         samplingRate: 44100,
@@ -251,52 +224,47 @@ export const useConversation = (config: any) => {
       console.log('Access to microphone granted');
       console.log(startMessage);
 
-      if (recorderState === 'recording') {
-        console.log(`recorder state is not ready`, recorderState);
-        return;
-      }
+      AudioRecord.init(options);
 
-      const path = Platform.select({
-        ios: `${RNFS.DocumentDirectoryPath}/audio.m4a`,
-        android: `${RNFS.ExternalStorageDirectoryPath}/audio.mp3`,
-      });
+      console.log(`audio recording started`, AudioRecord);
 
-      await recorderToUse.startRecorder();
-      recorderToUse.addRecordBackListener(async (e: any) => {
-        console.log(`Recording...`, e.currentPosition);
-        const base64AudioData = await RNFS.readFile(path!, 'base64');
-        if (newSocket.readyState === WebSocket.OPEN) {
-          newSocket.send(
-            stringify({
-              type: 'websocket_audio',
-              data: base64AudioData,
-            }),
-          );
+      // Handle raw PCM data
+      AudioRecord.on('data', data => {
+        console.log(`Audio recording data received`, data);
+        const chunk = Buffer.from(data, 'base64');
+        console.log('AudioRecord captured data:', chunk.byteLength); // Log data to debug
+        if (data && data.length > 0) {
+          // setUserAudioData((prev: any) => [...prev, ...data]);
+          if (newSocket.readyState === WebSocket.OPEN) {
+            const base64AudioData = Buffer.from(data).toString('base64');
+            newSocket.send(
+              JSON.stringify({
+                type: 'websocket_audio',
+                data: base64AudioData,
+              }),
+            );
+          }
+        } else {
+          console.warn('Received empty data from AudioRecord');
         }
       });
 
+      AudioRecord.start();
       setRecorderState('recording');
     } catch (error) {
-      console.error(
-        'Error during recorder initialization:',
-        getErrorFromApi(error),
-      );
-      stopConversation(error);
+      console.log(`Audio recording error:`, error);
     }
   };
 
   const stopConversation = async (error?: any) => {
+    console.log(`stop conversation called`, recorderState);
     if (recorderState === 'recording') {
-      try {
-        await audioRecorderPlayer.stopRecorder();
-      } catch (err) {
-        console.error('Error stopping recorder:', err);
-      }
+      AudioRecord.stop();
       setRecorderState('inactive');
     }
 
     if (socket) {
-      socket.send(stringify({type: 'websocket_stop'}));
+      socket.send(JSON.stringify({type: 'websocket_stop'}));
       socket.close();
       setSocket(null);
     }
@@ -306,6 +274,7 @@ export const useConversation = (config: any) => {
       setError(error);
     }
   };
+
   const getBackendUrl = async (): Promise<any> => {
     if ('backendUrl' in config) {
       return config.backendUrl!;

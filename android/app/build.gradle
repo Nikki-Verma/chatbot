@@ -54,8 +54,8 @@ react {
     // hermesFlags = ["-O", "-output-source-map"]
     //
     // Added by install-expo-modules
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsoluteFile().getParentFile().getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim())
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli')"].execute(null, rootDir).text.trim())
+     entryFile = new File("${rootDir}/../index.js")
+    cliFile = new File("${rootDir}/../node_modules/@react-native-community/cli/build/bin.js")
     bundleCommand = "export:embed"
 }
 

@@ -37,7 +37,7 @@ const ChatInput: React.FC<Props> = memo(function ChatInput({
   input,
   handleInputChange,
   stopStream,
-  agentId = '66a73937facd745821a59c87',
+  agentId = '669176ac6032166ba10c3ec5',
 }: any) {
   const [audioVisualizerOpen, setAudioVisualizerOpen] = useState(false);
 
